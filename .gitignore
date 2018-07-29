@@ -1,3 +1,4 @@
 keys
 cache
 __pycache__
+db/app.db
