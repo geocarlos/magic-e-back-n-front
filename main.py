@@ -2,6 +2,7 @@ from flask import Flask, render_template
 from flask_caching import Cache
 import requests
 import json
+import controller as ctrl
 
 app = Flask(__name__)
 
@@ -12,8 +13,15 @@ app.cache = Cache(app)
 keys = json.loads(open('./keys/keys.json').read())
 
 @app.route('/api/<word>')
-def index(word):
+def get_a_word(word):
     return get_word(word)
+
+@app.route('/api/add/<group>/<word>')
+def add_a_word(group, word):
+    new_word = get_word(word)
+    ctrl.add_word(group, word);
+    return new_word;
+
 
 def get_word(word):
     cached = app.cache.get(word)
