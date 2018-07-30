@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from flask_caching import Cache
 import requests
 import json
@@ -12,17 +12,41 @@ app.cache = Cache(app)
 
 keys = json.loads(open('./keys/keys.json').read())
 
-@app.route('/api/<word>')
+"""
+    Get a single word from the cache or from the API
+"""
+@app.route('/api/word/<word>')
 def get_a_word(word):
     return get_word(word)
 
+"""
+    Get words grouped according to a given letter
+"""
+@app.route('/api/group/<group>')
+def get_group_of_words(group):
+    words = ctrl.get_words_by_group(group)
+    return jsonify(words)
+
+"""
+    Get all groups and words
+"""
+@app.route('/api/words')
+def get_all_words():
+    words = ctrl.get_all_word_groups()
+    return jsonify(words)
+
+"""
+    Add a word to a group according to a given letter
+"""
 @app.route('/api/add/<group>/<word>')
 def add_a_word(group, word):
-    new_word = get_word(word)
-    ctrl.add_word(group, word);
-    return new_word;
+    new_word = json.loads(get_word(word))
+    ctrl.add_word(group, new_word['results'][0])
+    return jsonify(new_word)
 
-
+"""
+    Get and cache a word from the API
+"""
 def get_word(word):
     cached = app.cache.get(word)
     if(cached):
