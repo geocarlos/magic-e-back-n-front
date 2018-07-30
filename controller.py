@@ -48,10 +48,8 @@ def get_all_word_groups():
 
 def get_words_by_group(group_letter):
     group = None
-    word_group = {
-        "group": group_letter,
-        "words": []
-    }
+    word_group = {}
+    word_group[group_letter] = {'words': []}
     try:
         group = session.query(Group).filter_by(letter=group_letter).one()
     except Exception:
@@ -59,7 +57,8 @@ def get_words_by_group(group_letter):
     entries = session.query(Entry).filter_by(group_id=group.id)
 
     for e in entries:
-        word_group['words'].append({'word': e.word, 'audio': e.audio, 'ipa_spelling': e.ipa_spelling})
+        word_group[group_letter]['words'].append({
+            'word': e.word, 'audio': e.audio, 'ipa_spelling': e.ipa_spelling})
 
     session.close()
 
