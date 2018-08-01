@@ -1,10 +1,14 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, url_for
 from flask_caching import Cache
 import requests
 import json
 import controller as ctrl
 
-app = Flask(__name__)
+
+app = Flask(__name__,
+            static_folder='./public/static',
+            template_folder='./public'
+            )
 
 app.config['CACHE_TYPE'] = 'filesystem'
 app.config['CACHE_DIR'] = './cache'
@@ -12,41 +16,68 @@ app.cache = Cache(app)
 
 keys = json.loads(open('./keys/keys.json').read())
 
+
+"""
+    Serve React app
+"""
+# @app.route('/')
+# def index():
+#     return render_template('index.html')
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    return render_template("index.html")
+
 """
     Get a single word from the cache or from the API
 """
+
+
 @app.route('/api/word/<word>')
 def get_a_word(word):
     return get_word(word)
 
+
 """
     Get words grouped according to a given letter
 """
+
+
 @app.route('/api/group/<group>')
 def get_group_of_words(group):
     words = ctrl.get_words_by_group(group)
     return jsonify(words)
 
+
 """
     Get all groups and words
 """
+
+
 @app.route('/api/words')
 def get_all_words():
     words = ctrl.get_all_word_groups()
     return jsonify(words)
 
+
 """
     Add a word to a group according to a given letter
 """
+
+
 @app.route('/api/add/<group>/<word>')
 def add_a_word(group, word):
     new_word = json.loads(get_word(word))
     ctrl.add_word(group, new_word['results'][0])
     return jsonify(new_word)
 
+
 """
     Get and cache a word from the API
 """
+
+
 def get_word(word):
     cached = app.cache.get(word)
     if(cached):
@@ -63,14 +94,15 @@ def get_word(word):
     r = None
 
     try:
-        r = requests.get(url, headers = {'app_id': app_id, 'app_key': app_key})
+        r = requests.get(url, headers={'app_id': app_id, 'app_key': app_key})
         app.cache.set(word, r.text)
     except:
         return '{"error": "Unable to fetch word"}'
 
     return r.text
 
+
 if __name__ == '__main__':
     app.secret_key = 'geowildcat_magic_ee'
     app.debug = True
-    app.run(host = '0.0.0.0', port = 5000)
+    app.run(host='0.0.0.0', port=5000)
