@@ -1,3 +1,5 @@
-# Magic E Back-end
+# Magic E Front-End and Back-End
 
-This is the back-end for my Magic e app.
+Flask application with React application on front-end.
+
+Or React application with a Flask application as back-end.
